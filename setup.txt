@@ -1,0 +1,124 @@
+// ------ First Project: ecomm/products
+
+1. create a folder for ecomm/products
+2. in that folder, ecomm/product, npm init -y
+3. npm install webpack@5.4.0 webpack-cli@4.5.0 webpack-dev-server@3.11.0 faker@5.1.0 html-webpack-plugin@5.1.0
+4. create src folder and index.js
+  // it will generate a lot of error because import is not working in normal js environment
+  import faker from 'faker';
+
+  let products = '';
+
+  for (let i = 0; i < 3; i++) {
+    const name = faker.commerce.productName();
+    products += `<div>${name}</div>`;
+  }
+
+  console.log(products);
+5. create webpack.config.js under the root
+   and put the one below
+
+    // first webpack
+    module.exports = {
+      mode: 'development'
+    }
+
+6. in package.json, 
+   "scripts": {
+      "start": "webpack"
+    },
+
+7. npm start in terminal ---> it will create "dist" folder!!!!
+
+What is webpack?
+Webpack’s role is to control many different files including dependencies in node_modules to get into a single file, “main.js”, or “bundle.js”
+
+If you see main.js in dist folder created webpack, we can find the definition of “faker” lib in node_modules. 
+
+So by implementing webpack, every files in node_modules and files built by developers can be managed 
+and eventually bundled into a single file to be a single page application.
+
+
+8. Webpack DevServer (Please refer to the diagram of ms file)
+- Webpack DevServer: Webpack devServer is taking the Webpack output and make it available in the browser.
+- Webpack devServer is setup in the webpack.config.js
+
+  devServer: {
+    // it is important!!
+    port: 8081,
+  }
+
+- in the package.josn, 
+  "start": "webpack serve"
+
+- in the terminal npm ru startm and we can see the message, http://localhost:8081/
+  i ｢wds｣: Project is running at http://localhost:8081/
+  i ｢wds｣: webpack output is served from /
+  i ｢wds｣: Content not from webpack is served from C:\for_poogi_pooni\microFrontend\ecomm\products
+
+- in the browser,  http://localhost:8081/main.js : we can see the content of the file.
+
+9. Create a content (src/index.js) to be rendered in the browser.
+  1) create a public folder and index.html. (This.html) is to get the content from src/index.js
+  
+  <!DOCTYPE html>
+  <html>
+    <head>
+
+    </head>
+    // we can manually plugin the files (source index.js file) coming out of webpack.
+    // However, in the webpack server is not able to dynamically predicts the files which can be modified.
+    // Webpack devServer can't recognize files which dad modifications
+    // Also browser (html) can't identify each individual file (module/component) 
+    <script src="dist/main.js" ></script>    
+    <body>
+      
+    </body>
+  </html>
+  
+  2) In the webpack.config.js,
+
+    // In order to resolve the issue above, we can use a lib for "html-webpack-plugin"
+    const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+    module.exports = {
+      mode: 'development',
+      // setting up webpack devServer
+      devServer: {
+        // it is important!!
+        port: 8081,
+      },
+      // file or component plugin into index.html
+      // this plugin will take a look at the different files from webpack,
+      //  and automatically update the file/module into index.html.
+      // So each file will be rendered even if it has the update.
+      plugins: [
+        new HtmlWebpackPlugin({
+          template: './public/index.html',
+        })
+      ],
+    }
+
+  3) stop terminal and rerun, and go to browser with URL: localhost:8081
+      // in the console.log we can find the 
+      // products += `<div>${name}</div>`; in console.log
+
+      for (let i = 0; i < 3; i++) {
+        const name = faker.commerce.productName();
+        products += `<div>${name}</div>`;
+      }
+
+      console.log(products);
+
+10. container which is connected to each sub projects
+  1) create a container folder in ecomm folder
+  2) go to container directory.
+  3) npm init -y
+  4) same lib install: npm install  nodemon webpack@5.3.2 webpack-cli@4.5.0 webpack-dev-server@3.11.0 html-webpack-plugin@5.1.0
+  5) same folder structure with product projects
+  
+
+
+
+      
+
