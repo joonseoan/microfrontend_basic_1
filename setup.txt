@@ -116,7 +116,105 @@ and eventually bundled into a single file to be a single page application.
   3) npm init -y
   4) same lib install: npm install  nodemon webpack@5.3.2 webpack-cli@4.5.0 webpack-dev-server@3.11.0 html-webpack-plugin@5.1.0
   5) same folder structure with product projects
-  
+
+
+/*
+  Implementation of module federation
+  1. Designate one app as the host ("Container") and one as the Remote("Products")
+  2. In the Remote, decides which modules (files) you want to make available to other projects
+  3. Setup Module Federation plugin to expose those files ---> 11 below
+      
+      Module federation in webpackFederationPlugin
+
+      // lib to bundle different project. For instance container project will have product project
+      // in webpack file of "products"
+      // what is this?
+      const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+      
+      
+      const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+      module.exports = {
+        mode: 'development',
+        devServer: {
+          port: 8081,
+        },
+        plugins: [
+          // plugin
+          new ModuleFederationPlugin({
+            name: 'products',
+            filename: 'remoteEntry.js',
+            exposes: {
+              './ProductsIndex': './src/index'
+            }
+          }),
+          new HtmlWebpackPlugin({
+            template: './public/index.html',
+          })
+        ],
+      }
+
+
+  4. In the Host, decide which file you want to get from the remoteEntry
+
+    Now, we just wants to get in src/index.js Products from Host.
+
+  5. Setup Module Federation plugin to fetch those files
+      const HtmlWebpackPlugin = require('html-webpack-plugin');
+      const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+
+      module.exports = {
+        mode: 'development',
+        // setting up webpack devServer
+        devServer: {
+          // it is important!!
+          port: 8080,
+        },
+        plugins: [
+          new ModuleFederationPlugin({
+            name: 'container',
+            remotes: {
+              products: 'products@http://localhost:8081/remoteEntry.js'
+            }
+          }),
+          new HtmlWebpackPlugin({
+            template: './public/index.html',
+          })
+        ],
+      }
+
+
+  6. In the Host, refactor the entry point to load asychronously
+    
+    - In the Container, change src/index.js ---> src/bootstrap.js
+    - In the Container, create index.js and in this file
+
+      import('./bootstrap');
+
+
+  7. In the Host, import whatever files you need from the remoteEntry
+
+    - In the Container, and its bootstrap.js
+
+      import 'products/ProductsIndex';
+
+      console.log('Container');
+
+  8. stop both Container and Remote and npm start again!
+
+    We will some error like 
+
+    document.querySelector('#dev-product').innerHTML = products; // In Products
+    ==> it cannot find id="dev-products" because actually, products index.js is running index.html in "Container"
+    In the Container's html does not have the id yet.
+
+    After we setup <div id="dev-products" > </div>, we can render
+    for loops <div></div> from Products's index.js file!!!
+*/
+
+
+
+
 
 
 
